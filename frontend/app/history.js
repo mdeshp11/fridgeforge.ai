@@ -1,133 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  ActivityIndicator,
+  StyleSheet,
+  ScrollView,
+  useWindowDimensions,
 } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { ChefHat, Calendar, Clock, Trash2 } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { Clock, Calendar } from 'lucide-react-native';
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#1a1a1a' },
+  header: { paddingVertical: 16, borderBottomColor: '#333', borderBottomWidth: 1 },
+  title: { color: '#fff', fontWeight: 'bold', fontSize: 24 },
+  subtitle: { color: '#9e9e9e', marginTop: 4 },
+  content: { flex: 1, paddingVertical: 16 },
+  contentInner: { maxWidth: 1024, width: '100%', marginHorizontal: 'auto' },
+  item: { backgroundColor: '#2a2a2a', padding: 16, borderRadius: 12, marginBottom: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  itemText: { color: '#fff', fontWeight: '500' },
+  itemValue: { color: '#9e9e9e', fontSize: 14 },
+  btnContainer: { paddingVertical: 24 },
+  btn: { paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, alignItems: 'center', backgroundColor: '#424242' },
+  btnText: { color: '#fff', fontWeight: 'bold' },
+});
 
 export default function HistoryScreen() {
   const router = useRouter();
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      loadHistory();
-    }, [])
-  );
-
-  const loadHistory = async () => {
-    try {
-      setLoading(true);
-      const stored = await AsyncStorage.getItem('recipeHistory');
-      if (stored) {
-        setHistory(JSON.parse(stored));
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading history:', error);
-      setLoading(false);
-    }
-  };
-
-  const deleteFromHistory = async (id) => {
-    try {
-      const updated = history.filter((item) => item.id !== id);
-      setHistory(updated);
-      await AsyncStorage.setItem('recipeHistory', JSON.stringify(updated));
-    } catch (error) {
-      console.error('Error deleting from history:', error);
-    }
-  };
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width > 768;
+  const horizontalPadding = isLargeScreen ? 48 : 24;
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-50">
-      <View className="px-6 py-4 border-b border-neutral-200">
-        <Text className="font-bold text-2xl text-neutral-900">History</Text>
-        <Text className="text-sm text-neutral-600 mt-1">
-          Your recent fridge analyses and recipes
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
+        <Text style={styles.title}>History</Text>
+        <Text style={styles.subtitle}>Recent Recipes</Text>
       </View>
 
-      {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#4CAF50" />
-        </View>
-      ) : history.length > 0 ? (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
-        >
-          {history.map((item, idx) => (
-            <TouchableOpacity
-              key={idx}
-              onPress={() =>
-                router.push({
-                  pathname: '/(home)/recipe-detail',
-                  params: { recipe: JSON.stringify(item) },
-                })
-              }
-              activeOpacity={0.7}
-              className="bg-white rounded-2xl p-4 mb-4 border border-neutral-200 flex-row items-center"
-            >
-              <View className="bg-primary-100 p-3 rounded-xl mr-4">
-                <ChefHat width={24} height={24} color="#4CAF50" strokeWidth={2} />
+      <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding }]}>
+        <View style={styles.contentInner}>
+          <View style={styles.item}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Clock width={20} height={20} color="#4CAF50" strokeWidth={2} />
+              <View>
+                <Text style={styles.itemText}>Tomato Pasta</Text>
+                <Text style={{ color: '#9e9e9e', fontSize: 12 }}>Today at 6:30 PM</Text>
               </View>
-
-              <View className="flex-1">
-                <Text className="font-bold text-neutral-900 text-base" numberOfLines={1}>
-                  {item.title}
-                </Text>
-                <View className="flex-row gap-4 mt-2">
-                  <View className="flex-row items-center gap-1">
-                    <Calendar width={12} height={12} color="#9e9e9e" />
-                    <Text className="text-xs text-neutral-500">
-                      {new Date(item.date).toLocaleDateString()}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-1">
-                    <Clock width={12} height={12} color="#9e9e9e" />
-                    <Text className="text-xs text-neutral-500">
-                      {item.cookTime} min
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => deleteFromHistory(item.id)}
-                className="bg-red-50 p-2 rounded-lg ml-2"
-              >
-                <Trash2 width={18} height={18} color="#ef4444" strokeWidth={2} />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      ) : (
-        <View className="flex-1 items-center justify-center px-6">
-          <View className="bg-neutral-100 p-6 rounded-full mb-4">
-            <ChefHat width={48} height={48} color="#9e9e9e" strokeWidth={1.5} />
+            </View>
           </View>
-          <Text className="font-bold text-neutral-900 text-center text-lg mb-2">
-            No History Yet
-          </Text>
-          <Text className="text-neutral-600 text-center text-sm mb-6">
-            Start by taking a photo of your fridge to see recipe suggestions
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push('/(home)')}
-            className="bg-primary-500 px-8 py-3 rounded-lg"
-          >
-            <Text className="text-white font-bold">Go to Home</Text>
+
+          <View style={styles.item}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Calendar width={20} height={20} color="#4CAF50" strokeWidth={2} />
+              <View>
+                <Text style={styles.itemText}>Salad Bowl</Text>
+                <Text style={{ color: '#9e9e9e', fontSize: 12 }}>Yesterday at 1:00 PM</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.item}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Clock width={20} height={20} color="#4CAF50" strokeWidth={2} />
+              <View>
+                <Text style={styles.itemText}>Basil Pesto</Text>
+                <Text style={{ color: '#9e9e9e', fontSize: 12 }}>2 days ago</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={[styles.btnContainer, { paddingHorizontal: horizontalPadding }]}>
+        <View style={styles.contentInner}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.btn}>
+            <Text style={styles.btnText}>Back</Text>
           </TouchableOpacity>
         </View>
-      )}
+      </View>
     </SafeAreaView>
   );
 }

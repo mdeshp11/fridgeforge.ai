@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Camera, Zap, ChefHat } from 'lucide-react-native';
@@ -124,8 +125,15 @@ const styles = StyleSheet.create({
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const [recentRecipes, setRecentRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Responsive values
+  const isLargeScreen = width > 768;
+  const maxWidth = isLargeScreen ? 1024 : '100%';
+  const horizontalPadding = isLargeScreen ? 48 : 24;
+  const buttonMaxWidth = isLargeScreen ? 500 : '100%';
 
   useEffect(() => {
     loadRecentRecipes();
@@ -148,82 +156,91 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
         {/* Hero Section */}
-        <View style={styles.hero}>
-          <Text style={styles.heroTitle}>🍳 FridgeForge</Text>
-          <Text style={styles.heroSubtitle}>Turn your fridge into meals with AI</Text>
-          <TouchableOpacity
-            onPress={() => router.push('/(home)/camera')}
-            activeOpacity={0.8}
-            style={styles.ctaButton}
-          >
-            <Camera width={20} height={20} color="#4CAF50" strokeWidth={2} />
-            <Text style={styles.ctaText}>Snap a Fridge Photo</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Quick Start */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Start</Text>
-          <View style={styles.quickStart}>
-            <TouchableOpacity
-              onPress={() => router.push('/(home)/camera')}
-              style={styles.quickButton}
-            >
-              <Zap width={24} height={24} color="#4CAF50" strokeWidth={2} />
-              <Text style={styles.quickButtonText}>Instant Analysis</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push('/(home)/ingredients')}
-              style={[styles.quickButton, { borderColor: '#FFA500' }]}
-            >
-              <ChefHat width={24} height={24} color="#FFA500" strokeWidth={2} />
-              <Text style={styles.quickButtonText}>Manual Input</Text>
-            </TouchableOpacity>
+        <View style={[styles.hero, { paddingHorizontal: horizontalPadding }]}>
+          <View style={{ maxWidth: maxWidth, marginHorizontal: 'auto', width: '100%' }}>
+            <Text style={styles.heroTitle}>🍳 FridgeForge</Text>
+            <Text style={styles.heroSubtitle}>Turn your fridge into meals with AI</Text>
+            <View style={{ width: buttonMaxWidth, alignSelf: isLargeScreen ? 'center' : 'flex-start' }}>
+              <TouchableOpacity
+                onPress={() => router.push('/(home)/camera')}
+                activeOpacity={0.8}
+                style={styles.ctaButton}
+              >
+                <Camera width={20} height={20} color="#4CAF50" strokeWidth={2} />
+                <Text style={styles.ctaText}>Snap a Fridge Photo</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
-        {/* Empty State */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Get Started</Text>
-          <View style={styles.card}>
-            <ChefHat width={48} height={48} color="#4CAF50" strokeWidth={1.5} />
-            <Text style={styles.cardTitle}>No recipes yet!</Text>
-            <Text style={{ color: '#9e9e9e', textAlign: 'center', marginBottom: 24 }}>
-              Take a photo of your fridge or pantry to get instant recipe suggestions
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.push('/(home)/camera')}
-              style={styles.cardButton}
-            >
-              <Text style={styles.cardButtonText}>Start Now</Text>
-            </TouchableOpacity>
+        {/* Content Container */}
+        <View style={{ maxWidth: maxWidth, width: '100%', marginHorizontal: 'auto', paddingHorizontal: horizontalPadding }}>
+          {/* Quick Start */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Quick Start</Text>
+            <View style={styles.quickStart}>
+              <TouchableOpacity
+                onPress={() => router.push('/(home)/camera')}
+                style={styles.quickButton}
+              >
+                <Zap width={24} height={24} color="#4CAF50" strokeWidth={2} />
+                <Text style={styles.quickButtonText}>Instant Analysis</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push('/(home)/ingredients')}
+                style={[styles.quickButton, { borderColor: '#FFA500' }]}
+              >
+                <ChefHat width={24} height={24} color="#FFA500" strokeWidth={2} />
+                <Text style={styles.quickButtonText}>Manual Input</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        {/* Features */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Why FridgeForge?</Text>
-          <View style={{ gap: 12 }}>
-            <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'flex-start' }}>
-              <View style={{ backgroundColor: '#e8f5e9', borderRadius: 12, padding: 8, marginRight: 12, marginTop: 4 }}>
-                <Zap width={16} height={16} color="#4CAF50" strokeWidth={2} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: '600', color: '#212121', fontSize: 14 }}>AI-Powered Detection</Text>
-                <Text style={{ fontSize: 12, color: '#9e9e9e', marginTop: 4 }}>
-                  Instantly identify ingredients from any photo
-                </Text>
+          {/* Empty State */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Get Started</Text>
+            <View style={styles.card}>
+              <ChefHat width={48} height={48} color="#4CAF50" strokeWidth={1.5} />
+              <Text style={styles.cardTitle}>No recipes yet!</Text>
+              <Text style={{ color: '#9e9e9e', textAlign: 'center', marginBottom: 24 }}>
+                Take a photo of your fridge or pantry to get instant recipe suggestions
+              </Text>
+              <View style={{ width: buttonMaxWidth, alignSelf: isLargeScreen ? 'center' : 'stretch' }}>
+                <TouchableOpacity
+                  onPress={() => router.push('/(home)/camera')}
+                  style={styles.cardButton}
+                >
+                  <Text style={styles.cardButtonText}>Start Now</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'flex-start' }}>
-              <View style={{ backgroundColor: '#fff3e0', borderRadius: 12, padding: 8, marginRight: 12, marginTop: 4 }}>
-                <ChefHat width={16} height={16} color="#FFA500" strokeWidth={2} />
+          </View>
+
+          {/* Features */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Why FridgeForge?</Text>
+            <View style={{ gap: 12 }}>
+              <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'flex-start' }}>
+                <View style={{ backgroundColor: '#e8f5e9', borderRadius: 12, padding: 8, marginRight: 12, marginTop: 4 }}>
+                  <Zap width={16} height={16} color="#4CAF50" strokeWidth={2} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '600', color: '#212121', fontSize: 14 }}>AI-Powered Detection</Text>
+                  <Text style={{ fontSize: 12, color: '#9e9e9e', marginTop: 4 }}>
+                    Instantly identify ingredients from any photo
+                  </Text>
+                </View>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: '600', color: '#212121', fontSize: 14 }}>Smart Recipes</Text>
-                <Text style={{ fontSize: 12, color: '#9e9e9e', marginTop: 4 }}>
-                  Get personalized recipe suggestions instantly
-                </Text>
+              <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'flex-start' }}>
+                <View style={{ backgroundColor: '#fff3e0', borderRadius: 12, padding: 8, marginRight: 12, marginTop: 4 }}>
+                  <ChefHat width={16} height={16} color="#FFA500" strokeWidth={2} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '600', color: '#212121', fontSize: 14 }}>Smart Recipes</Text>
+                  <Text style={{ fontSize: 12, color: '#9e9e9e', marginTop: 4 }}>
+                    Get personalized recipe suggestions instantly
+                  </Text>
+                </View>
               </View>
             </View>
           </View>

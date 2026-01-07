@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   StyleSheet,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Upload, X, RotateCcw, Check } from 'lucide-react-native';
@@ -69,8 +70,12 @@ const styles = StyleSheet.create({
 
 export default function CameraScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const [photo, setPhoto] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const isLargeScreen = width > 768;
+  const maxWidth = isLargeScreen ? 800 : '100%';
+  const horizontalPadding = isLargeScreen ? 48 : 24;
 
   const handlePickImage = async () => {
     try {
@@ -112,29 +117,31 @@ export default function CameraScreen() {
         <View style={styles.imageContainer}>
           <Image source={{ uri: photo.uri }} style={styles.image} />
         </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            onPress={handleRetake}
-            disabled={isLoading}
-            style={[styles.button, styles.secondaryButton]}
-          >
-            <RotateCcw width={20} height={20} color="#fff" strokeWidth={2} />
-            <Text style={styles.buttonText}>Retake</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleAnalyze}
-            disabled={isLoading}
-            style={[styles.button, styles.primaryButton]}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Check width={20} height={20} color="#fff" strokeWidth={2} />
-                <Text style={styles.buttonText}>Analyze</Text>
-              </>
-            )}
-          </TouchableOpacity>
+        <View style={[styles.buttonContainer, { paddingHorizontal: horizontalPadding }]}>
+          <View style={{ maxWidth: isLargeScreen ? 500 : '100%', alignSelf: isLargeScreen ? 'center' : 'stretch', width: '100%' }}>
+            <TouchableOpacity
+              onPress={handleRetake}
+              disabled={isLoading}
+              style={[styles.button, styles.secondaryButton]}
+            >
+              <RotateCcw width={20} height={20} color="#fff" strokeWidth={2} />
+              <Text style={styles.buttonText}>Retake</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleAnalyze}
+              disabled={isLoading}
+              style={[styles.button, styles.primaryButton, { marginTop: 12 }]}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Check width={20} height={20} color="#fff" strokeWidth={2} />
+                  <Text style={styles.buttonText}>Analyze</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -142,7 +149,7 @@ export default function CameraScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <TouchableOpacity onPress={() => router.back()}>
           <X width={28} height={28} color="#fff" strokeWidth={2} />
         </TouchableOpacity>
@@ -150,7 +157,7 @@ export default function CameraScreen() {
         <View style={{ width: 28 }} />
       </View>
 
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: horizontalPadding }}>
         <Upload width={64} height={64} color="#fff" strokeWidth={1} />
         <Text style={{ color: '#fff', fontWeight: '600', marginTop: 16 }}>Upload Photo</Text>
         <Text style={{ color: '#9e9e9e', textAlign: 'center', marginTop: 8, paddingHorizontal: 24 }}>
@@ -158,14 +165,16 @@ export default function CameraScreen() {
         </Text>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          onPress={handlePickImage}
-          style={[styles.button, styles.primaryButton]}
-        >
-          <Upload width={20} height={20} color="#fff" strokeWidth={2} />
-          <Text style={styles.buttonText}>Upload from Library</Text>
-        </TouchableOpacity>
+      <View style={[styles.buttonContainer, { paddingHorizontal: horizontalPadding }]}>
+        <View style={{ maxWidth: isLargeScreen ? 500 : '100%', alignSelf: isLargeScreen ? 'center' : 'stretch', width: '100%' }}>
+          <TouchableOpacity
+            onPress={handlePickImage}
+            style={[styles.button, styles.primaryButton]}
+          >
+            <Upload width={20} height={20} color="#fff" strokeWidth={2} />
+            <Text style={styles.buttonText}>Upload from Library</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
